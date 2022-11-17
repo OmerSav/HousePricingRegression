@@ -16,6 +16,7 @@ seaborn==0.12.1
 ipython==8.6.0
 jupyterlab==3.5.0
 tabulate==0.9.0
+statsmodels==0.13.5
 
 # backwards compatibility
 pathlib2
