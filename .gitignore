@@ -91,3 +91,4 @@ target/
 
 
 # Custom ignore starts here
+notebooks/old/
