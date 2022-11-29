@@ -16,7 +16,13 @@ def residuals_calc(X, y, model):
     return (y - model.predict(X))
 
 
-def residual_plot(y_true, residuals, title, ax):
+def rmsle(y_true, y_pred):
+    return np.sqrt(np.mean(np.square(np.log(y_pred + 1) - np.log(y_true + 1))))
+
+
+def residual_plot(y_true, residuals, title, ax=None):
+    if not ax:
+        fig, ax = plt.subplots()
     ax.scatter(y_true, residuals)
     ax.axhline(linestyle='dashed', c='y')
     ax.set(title=title, ylabel='Residuals',
@@ -45,14 +51,16 @@ def reg_score_table(model, X_train, X_test, y_train, y_test):
     mae_train = mean_absolute_error(y_train, y_train_pred)
     mse_train = mean_squared_error(y_train, y_train_pred)
     rmse_train = np.sqrt(mse_train)
+    rmsle_train = rmsle(y_train, y_train_pred)
 
     y_test_pred = model.predict(X_test)
     r2_test = r2_score(y_test, y_test_pred)
     mae_test = mean_absolute_error(y_test, y_test_pred)
     mse_test = mean_squared_error(y_test, y_test_pred)
     rmse_test = np.sqrt(mse_test)
+    rmsle_test = rmsle(y_test, y_test_pred)
 
     return pd.DataFrame(
-        {'Train': [r2_train, mae_train, mse_train, rmse_train],
-         'Test': [r2_test, mae_test, mse_test, rmse_test]},
-        index=['R2', 'MAE', 'MSE', 'RMSE'])
+        {'Train': [r2_train, mae_train, mse_train, rmse_train, rmsle_train],
+         'Test': [r2_test, mae_test, mse_test, rmse_test, rmsle_test]},
+        index=['R2', 'MAE', 'MSE', 'RMSE', 'RMSLE'])
