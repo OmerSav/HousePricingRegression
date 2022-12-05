@@ -17,7 +17,9 @@ def residuals_calc(X, y, model):
 
 
 def rmsle(y_true, y_pred):
-    return np.sqrt(np.mean(np.square(np.log(y_pred + 1) - np.log(y_true + 1))))
+    return np.sqrt(
+        np.mean(
+            np.square(np.log(y_pred + 1) - np.log(y_true + 1))))
 
 
 def residual_plot(y_true, residuals, title, ax=None):
@@ -47,6 +49,8 @@ def residual_plots(model, X_train, X_test, y_train, y_test):
 
 def reg_score_table(model, X_train, X_test, y_train, y_test):
     y_train_pred = model.predict(X_train)
+    if y_train_pred.ndim > 1:
+        y_train_pred = y_train_pred.flatten()
     r2_train = r2_score(y_train, y_train_pred)
     mae_train = mean_absolute_error(y_train, y_train_pred)
     mse_train = mean_squared_error(y_train, y_train_pred)
@@ -54,6 +58,8 @@ def reg_score_table(model, X_train, X_test, y_train, y_test):
     rmsle_train = rmsle(y_train, y_train_pred)
 
     y_test_pred = model.predict(X_test)
+    if y_test_pred.ndim > 1:
+        y_test_pred = y_test_pred.flatten()
     r2_test = r2_score(y_test, y_test_pred)
     mae_test = mean_absolute_error(y_test, y_test_pred)
     mse_test = mean_squared_error(y_test, y_test_pred)
