@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.preprocessing import OneHotEncoder
 
 
 def html_table(df):
@@ -70,3 +71,44 @@ def reg_score_table(model, X_train, X_test, y_train, y_test):
         {'Train': [r2_train, mae_train, mse_train, rmse_train, rmsle_train],
          'Test': [r2_test, mae_test, mse_test, rmse_test, rmsle_test]},
         index=['R2', 'MAE', 'MSE', 'RMSE', 'RMSLE'])
+
+
+def build_features(df: pd.DataFrame, enc: OneHotEncoder) -> pd.DataFrame:
+    '''Process new data to enter model without scaling
+    Operations -> Handle missings, apply one hot encoding on data.
+
+    Args:
+        df (pandas.DataFrame): df to procces
+        enc (sklearn.preprocessing.OneHotEncoder): One hot encoder fitted on
+        train set
+
+    Returns:
+        (pd.DataFrame): Dataset for models without scaling
+    '''
+    print(f'Before drop total row is: {len(df)}')
+    if 'SalePrice' in df.columns:
+        df = df[df['SalePrice'] < 500000]
+    df.dropna(axis=0, subset=['Electrical', 'MasVnrArea'], inplace=True)
+    df['GarageYrBlt'] = df['GarageYrBlt'].fillna(df['GarageYrBlt'].mean())
+    df = df.drop(['PoolQC', 'MiscFeature', 'Alley'], axis=1)
+    df['Fence'] = df['Fence'].fillna('None')
+    df['FireplaceQu'] = df['FireplaceQu'].fillna('None')
+    df['LotFrontage'] = df.groupby('Neighborhood')['LotFrontage'].transform(
+        lambda value: value.fillna(value.mean()))
+    df.drop(axis=1, columns=['Id'], inplace=True)
+    nullable_cols = ['GarageFinish', 'GarageQual', 'GarageCond', 'GarageType',
+                     'BsmtCond',
+                     'BsmtExposure', 'BsmtQual', 'BsmtFinType1', 'BsmtFinType2']
+    fill_cols = [col for col in df.columns if col not in nullable_cols]
+    df.dropna(axis=0, subset=fill_cols, inplace=True)
+    print(f'After drop total row is: {len(df)}')
+
+    df.reset_index(inplace=True, drop=True)
+    df['MSSubClass'] = df['MSSubClass'].apply(str)
+    object_df = df.select_dtypes(include='object')
+    numeric_df = df.select_dtypes(exclude='object')
+    df_objects_dummies = enc.transform(object_df)
+    df_encoded = pd.concat((numeric_df, pd.DataFrame(df_objects_dummies)),
+                           axis=1)
+    print(df_encoded.shape)
+    return df_encoded
