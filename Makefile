@@ -8,7 +8,7 @@ PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 PROFILE = default
 PROJECT_NAME = HousePricesKaggle
-PYTHON_INTERPRETER = python
+PYTHON_INTERPRETER = python3 || python
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
@@ -29,9 +29,15 @@ requirements: test_environment
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
 
-## Make Dataset
+## Train Models
 train_model: requirements
 	$(PYTHON_INTERPRETER) src/models/train_model.py
+
+## Predict Data with Models
+model=ridge
+data_path=./data/raw/test.csv
+predict: requirements
+	$(PYTHON_INTERPRETER) src/models/predict_model.py --model ${model} --data_path ${data_path}
 
 ## Delete all compiled Python files
 clean:

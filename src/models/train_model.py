@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-import pandas as pd
-import tensorflow as tf
+import logging
 from joblib import dump
+import tensorflow as tf
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.svm import SVR
@@ -11,8 +11,13 @@ from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, \
     GradientBoostingRegressor
 import xgboost as xgb
 
+import pandas as pd
+from dotenv import find_dotenv, load_dotenv
+
 
 def main():
+    logger = logging.getLogger(__name__)
+    logger.info('Training models...')
     processed_data_dir = Path('./data/processed/')
     file_name = 'train.csv'
     file_path = processed_data_dir / file_name
@@ -57,16 +62,16 @@ def main():
                              **{'criterion': 'squared_error', 'max_depth': 300,
                                 'min_impurity_decrease': 1.0,
                                 'n_estimators': 200})
-    abr_final = train_deploy(AdaBoostRegressor, X, '0.8-adaboost',
+    abr_final = train_deploy(AdaBoostRegressor, X, '0.9-adaboost',
                              **{'learning_rate': 1.0, 'loss': 'square',
                                 'n_estimators': 1000})
     gbr_final = train_deploy(GradientBoostingRegressor, X,
-                             '0.9-gradientboosting',
+                             '0.10-gradientboosting',
                              **{'max_depth': 3,
                                 'min_impurity_decrease': 0.21544,
                                 'n_estimators': 200})
     xgbr_final = train_deploy(xgb.XGBRegressor, X,
-                              '0.10-extremegradientboosting',
+                              '0.11-extremegradientboosting',
                               **{'max_depth': 3, 'n_estimators': 300})
 
     def nodereg(nodes):
@@ -107,7 +112,7 @@ def main():
                   verbose=0,
                   callbacks=[callback, ],
                   shuffle=True)
-    ann_final.save(models_trained_dir / f'0.11-neuralnet.h5')
+    ann_final.save(models_trained_dir / f'0.12-neuralnet.h5')
 
     dump(final_scaler, featurebuild_dir / '0.2-standardscaler.joblib')
     dump(polynomial_converter,
@@ -115,4 +120,13 @@ def main():
 
 
 if __name__ == '__main__':
+    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
+
+    # not used in this stub but often useful for finding various files
+    project_dir = Path(__file__).resolve().parents[2]
+
+    # find .env automagically by walking up directories until it's found, then
+    # load up the .env entries as environment variables
+    load_dotenv(find_dotenv())
     main()
