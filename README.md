@@ -83,8 +83,8 @@ pdf versions of these notebooks with same name in
 **reports** folder.
 Also you can find helper function on **src/utils.py** and data preparation
 training, prediction
-codes in **src**. This scripts coded for using easily on command line with *
-make*
+codes in **src**. This scripts coded for using easily on command line with
+*make*
 commmads (you can see detailed command prompt api from below).
 
 ## Model Training and Performance
@@ -252,8 +252,8 @@ Proccessed training data.(*make data* command)
 
 It trains model with **data/proccesed/train.csv** and then saves trained models
 to **models/trained/** folder.
-It also saves standart scaler and polynomial converter to **
-models/featurebuild/**.
+It also saves standart scaler and polynomial converter to
+**models/featurebuild/**.
 
 ### *make* predict
 
@@ -273,11 +273,11 @@ Model argument could be any of them below:
 ```
 'regression', 'polynomial-regression', 'lasso', 'ridge',
 'elasticnet', 'SVR', 'decision-tree', 'ada-boost',
-'random-forest', 'gradient-boosting', 'XGBR'
+'random-forest', 'gradient-boosting', 'XGBR', 'neural-network'
 ```
 
 The data argument could be any file path with data that has the same structure
-as ** data/raw/test.csv**.
+as **data/raw/test.csv**.
 
 It predicts data and saves the result as CSV to **data/predictions/** folder
 with the name of the original file and time stamp following it.

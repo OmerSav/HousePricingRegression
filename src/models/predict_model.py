@@ -5,6 +5,7 @@ from pathlib import Path
 import joblib
 import datetime
 
+import tensorflow as tf
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from src.utils import build_features
@@ -12,7 +13,10 @@ from src.utils import build_features
 model_names = ['regression', 'polynomial-regression', 'lasso', 'ridge',
                'elasticnet', 'SVR', 'decision-tree', 'ada-boost',
                'random-forest',
-               'gradient-boosting', 'XGBR']
+               'gradient-boosting', 'XGBR', 'neural-network']
+
+scaled_models = ['regression', 'polynomial-regression', 'lasso', 'ridge',
+                 'elasticnet', 'SVR', 'neural-network']
 
 
 @click.command()
@@ -43,15 +47,22 @@ def main(model, data_path):
     models_filenames.sort(
         key=lambda name: int(name.split('-')[0].split('.')[1]))
     mdl = models_filenames[model_index]
-    mdl = joblib.load(models_path / mdl)
+    if model == 'neural-network':
+        mdl = tf.keras.models.load_model(models_path / mdl, custom_objects=None,
+                                         compile=False)
+    else:
+        mdl = joblib.load(models_path / mdl)
     enc = joblib.load(feature_build_path / '0.1-onehotencoder.joblib')
     df = pd.read_csv(data_path)
     df_final = build_features(df, enc)
     # num cols after transformation 304
     if df_final.shape[1] != 304:
         raise Exception(logger.info(f'Inputted data shape wrong!'))
-    sc = joblib.load(feature_build_path / '0.2-standardscaler.joblib')
-    X = sc.transform(df_final)
+
+    X = df_final
+    if model in scaled_models:
+        sc = joblib.load(feature_build_path / '0.2-standardscaler.joblib')
+        X = sc.transform(df_final)
     if model == 'polynomial-regression':
         pol_c = joblib.load(feature_build_path /
                             '0.3-polynomialconverter.joblib')
